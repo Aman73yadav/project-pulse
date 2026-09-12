@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck } from "lucide-react";
+import { getDemoPassword } from "@/lib/seed.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -29,12 +30,11 @@ const DEMO_ACCOUNTS = [
   { label: "Developer · Ravi Kumar", email: "dev1@velozity.test" },
   { label: "Developer · Sara Iqbal", email: "dev4@velozity.test" },
 ];
-const DEMO_PASSWORD = "Password123!";
-
 function AuthPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("admin@velozity.test");
-  const [password, setPassword] = useState(DEMO_PASSWORD);
+  const [password, setPassword] = useState("");
+  const [demoPassword, setDemoPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -42,6 +42,13 @@ function AuthPage() {
       if (data.session) navigate({ to: "/dashboard", replace: true });
     });
   }, [navigate]);
+
+  useEffect(() => {
+    void getDemoPassword().then((result) => {
+      setDemoPassword(result.password);
+      setPassword((current) => current || result.password);
+    });
+  }, []);
 
   async function signIn(withEmail: string, withPassword: string) {
     setBusy(true);
@@ -72,7 +79,7 @@ function AuthPage() {
           <div className="rounded-lg border border-border bg-card p-4">
             <p className="text-sm font-medium">Demo accounts</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Password for all accounts: <span className="font-mono">{DEMO_PASSWORD}</span>
+              Password for all accounts: <span className="font-mono">{demoPassword}</span>
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {DEMO_ACCOUNTS.map((account) => (
@@ -83,8 +90,8 @@ function AuthPage() {
                   disabled={busy}
                   onClick={() => {
                     setEmail(account.email);
-                    setPassword(DEMO_PASSWORD);
-                    void signIn(account.email, DEMO_PASSWORD);
+                    setPassword(demoPassword);
+                    void signIn(account.email, demoPassword);
                   }}
                 >
                   {account.label}

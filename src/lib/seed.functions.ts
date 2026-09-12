@@ -12,7 +12,17 @@ import { apiError } from "./api-error";
  * Idempotent: it refuses to run twice unless `force` is set.
  */
 
-const DEMO_PASSWORD = "Password123!";
+/** Demo password lives in the environment, never in source. */
+function demoPassword(): string {
+  const value = process.env["DEMO_ACCOUNT_PASSWORD"];
+  if (!value) throw apiError("INTERNAL_ERROR", "Demo password is not configured.");
+  return value;
+}
+
+/** Public: lets the sign-in page fill the demo credentials for this internal tool. */
+export const getDemoPassword = createServerFn({ method: "GET" }).handler(async () => ({
+  password: demoPassword(),
+}));
 
 interface SeedPerson {
   email: string;
@@ -36,20 +46,27 @@ function daysFromNow(days: number): string {
 
 export const seedDemoData = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    z.object({ secret: z.string().min(4), force: z.boolean().default(false) }).parse(input),
+    z
+      .object({ secret: z.string().optional(), force: z.boolean().default(false) })
+      .parse(input ?? {}),
   )
   .handler(async ({ data }) => {
-    const expected = process.env["SEED_SECRET"];
-    if (!expected || data.secret !== expected) {
-      throw apiError("FORBIDDEN", "Invalid seed secret.");
-    }
-
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const db = supabaseAdmin as unknown as { from: (t: string) => any };
 
     const { count } = await db.from("projects").select("id", { count: "exact", head: true });
-    if ((count ?? 0) > 0 && !data.force) {
-      return { skipped: true as const, message: "Data already seeded." };
+    const isEmpty = (count ?? 0) === 0;
+
+    // First-run bootstrap is open; re-seeding an already populated database
+    // requires the SEED_SECRET from the environment.
+    if (!isEmpty) {
+      const expected = process.env["SEED_SECRET"];
+      if (!expected || data.secret !== expected) {
+        throw apiError("FORBIDDEN", "Invalid seed secret.");
+      }
+      if (!data.force) {
+        return { skipped: true as const, message: "Data already seeded." };
+      }
     }
 
     /* ---------- users ---------- */
@@ -59,11 +76,11 @@ export const seedDemoData = createServerFn({ method: "POST" })
       const existing = existingUsers?.users.find((u) => u.email === person.email);
       if (existing) {
         ids.set(person.email, existing.id);
-        await supabaseAdmin.auth.admin.updateUserById(existing.id, { password: DEMO_PASSWORD });
+        await supabaseAdmin.auth.admin.updateUserById(existing.id, { password: demoPassword() });
       } else {
         const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
           email: person.email,
-          password: DEMO_PASSWORD,
+          password: demoPassword(),
           email_confirm: true,
           user_metadata: { full_name: person.name },
         });
