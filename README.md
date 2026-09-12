@@ -10,6 +10,9 @@ An internal project-management dashboard for a small agency. It supports three r
 - **Notifications**: in-app notifications for task assignments and tasks moved to *In Review*, with unread badge and mark-read.
 - **Overdue flagging**: a scheduled database job flags overdue tasks every hour.
 - **Shareable filters**: task lists can be filtered by status, priority, and due-date range through query parameters.
+- **Accounts**: real sign-up and email password reset. The first account created becomes the Admin; later sign-ups start as Developer. Any signed-in account without a profile/role row is repaired on first load, so a dashboard never renders "No role".
+- **Task discussion & files**: every task has a detail page (`/task/:id`) with comments and private file attachments (8 MB per file). Files live in a private bucket; downloads are served through short-lived signed URLs issued only after the server re-checks visibility, so no storage object is publicly reachable.
+- **Approval flow**: a Developer may move a task To Do → In Progress → In Review and back, but only an Admin or Project Manager can mark it *Done*. This is enforced by the `guard_task_update()` database trigger, not by the UI — the UI only hides options the database would reject.
 
 ## Tech stack
 

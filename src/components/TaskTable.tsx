@@ -3,7 +3,9 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { updateTaskStatus } from "@/lib/dashboard.functions";
 import { readableError } from "@/lib/api-error";
-import { STATUS_LABEL, STATUS_ORDER, type Task, type TaskStatus } from "@/lib/domain";
+import { STATUS_LABEL, type Task, type TaskStatus } from "@/lib/domain";
+import { allowedStatuses } from "@/lib/workflow";
+import { useMe } from "@/hooks/useMe";
 import { OverdueBadge, PriorityBadge, StatusBadge } from "@/components/badges";
 import {
   Select,
@@ -40,6 +42,8 @@ export function TaskTable({
   emptyMessage?: string;
 }) {
   const queryClient = useQueryClient();
+  const { data: me } = useMe();
+  const role = me?.role ?? "developer";
   const changeStatus = useMutation({
     mutationFn: (input: { id: string; status: TaskStatus }) => updateTaskStatus({ data: input }),
     onSuccess: (_data, input) => {
@@ -82,7 +86,13 @@ export function TaskTable({
               </TableCell>
               <TableCell className="max-w-80">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium">{task.title}</span>
+                  <Link
+                    to="/task/$taskId"
+                    params={{ taskId: task.id }}
+                    className="font-medium hover:text-primary hover:underline"
+                  >
+                    {task.title}
+                  </Link>
                   {task.is_overdue && <OverdueBadge />}
                 </div>
                 {task.description && (
@@ -122,7 +132,7 @@ export function TaskTable({
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {STATUS_ORDER.map((status) => (
+                    {allowedStatuses(role, task.status).map((status) => (
                       <SelectItem key={status} value={status}>
                         {STATUS_LABEL[status]}
                       </SelectItem>
