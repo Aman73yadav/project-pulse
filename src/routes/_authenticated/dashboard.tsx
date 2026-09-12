@@ -71,6 +71,7 @@ function StatCard({
 function DashboardPage() {
   const { data: me } = useMe();
   const role = me?.role ?? "developer";
+  const online = usePresence(me?.id, me?.full_name);
 
   const stats = useQuery({
     queryKey: ["stats"],
@@ -108,7 +109,20 @@ function DashboardPage() {
               : "Only the tasks assigned to you — enforced by the database."
       }
     >
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        className={
+          role === "admin"
+            ? "grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
+            : "grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        }
+      >
+        {role === "admin" && (
+          <StatCard
+            label="Online now"
+            value={online}
+            icon={Radio}
+          />
+        )}
         {stats.isLoading || !stats.data ? (
           Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
         ) : (
