@@ -108,6 +108,16 @@ export interface AppNotification {
   created_at: string;
 }
 
+export interface DashboardStats {
+  role: AppRole | null;
+  projectCount: number;
+  taskCount: number;
+  byStatus: Record<TaskStatus, number>;
+  byPriority: Record<TaskPriority, number>;
+  overdue: number;
+  dueThisWeek: number;
+}
+
 export interface TaskFilters {
   projectId?: string;
   status?: TaskStatus[];
