@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck } from "lucide-react";
-import { getDemoPassword } from "@/lib/seed.functions";
+import { getDemoPassword, DEFAULT_DEMO_PASSWORD } from "@/lib/seed.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
