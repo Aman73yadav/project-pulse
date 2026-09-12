@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, CalendarClock, FolderKanban, ListChecks } from "lucide-react";
+import { AlertTriangle, CalendarClock, FolderKanban, ListChecks, Radio } from "lucide-react";
 import { getDashboardStats, listTasks } from "@/lib/dashboard.functions";
 import {
   PRIORITY_LABEL,
@@ -14,6 +14,7 @@ import { AppShell } from "@/components/AppShell";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { TaskTable } from "@/components/TaskTable";
 import { useMe } from "@/hooks/useMe";
+import { usePresence } from "@/hooks/usePresence";
 import { useRealtimeRefresh } from "@/hooks/useRealtime";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -70,6 +71,7 @@ function StatCard({
 function DashboardPage() {
   const { data: me } = useMe();
   const role = me?.role ?? "developer";
+  const online = usePresence(me?.id, me?.full_name);
 
   const stats = useQuery({
     queryKey: ["stats"],
@@ -107,7 +109,20 @@ function DashboardPage() {
               : "Only the tasks assigned to you — enforced by the database."
       }
     >
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        className={
+          role === "admin"
+            ? "grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
+            : "grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        }
+      >
+        {role === "admin" && (
+          <StatCard
+            label="Online now"
+            value={online}
+            icon={Radio}
+          />
+        )}
         {stats.isLoading || !stats.data ? (
           Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
         ) : (
