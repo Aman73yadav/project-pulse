@@ -86,7 +86,13 @@ export function TaskTable({
               </TableCell>
               <TableCell className="max-w-80">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium">{task.title}</span>
+                  <Link
+                    to="/task/$taskId"
+                    params={{ taskId: task.id }}
+                    className="font-medium hover:text-primary hover:underline"
+                  >
+                    {task.title}
+                  </Link>
                   {task.is_overdue && <OverdueBadge />}
                 </div>
                 {task.description && (
@@ -126,7 +132,7 @@ export function TaskTable({
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {STATUS_ORDER.map((status) => (
+                    {allowedStatuses(role, task.status).map((status) => (
                       <SelectItem key={status} value={status}>
                         {STATUS_LABEL[status]}
                       </SelectItem>
