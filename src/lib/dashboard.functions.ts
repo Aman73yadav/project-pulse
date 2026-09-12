@@ -33,12 +33,6 @@ const taskFilterSchema = z.object({
   overdueOnly: z.boolean().optional(),
 });
 
-type SupabaseClientType = Parameters<
-  Parameters<typeof requireSupabaseAuth.server>[0]
->[0] extends never
-  ? never
-  : never;
-
 /* ------------------------------------------------------------------ */
 /* helpers                                                             */
 /* ------------------------------------------------------------------ */
@@ -50,7 +44,9 @@ type AnyClient = {
 async function loadPeople(supabase: AnyClient): Promise<Map<string, string>> {
   const { data, error } = await supabase.from("profiles").select("id, full_name");
   if (error) throwDbError(error, "Team members could not be loaded.");
-  return new Map((data ?? []).map((p: { id: string; full_name: string }) => [p.id, p.full_name]));
+  return new Map<string, string>(
+    (data ?? []).map((p: { id: string; full_name: string }) => [p.id, p.full_name] as [string, string]),
+  );
 }
 
 async function loadRole(supabase: AnyClient, userId: string): Promise<AppRole | null> {
@@ -163,7 +159,9 @@ async function buildProjects(supabase: AnyClient): Promise<Project[]> {
 
   const people = await loadPeople(supabase);
   const { data: clients } = await supabase.from("clients").select("id, name");
-  const clientMap = new Map((clients ?? []).map((c: { id: string; name: string }) => [c.id, c.name]));
+  const clientMap = new Map<string, string>(
+    (clients ?? []).map((c: { id: string; name: string }) => [c.id, c.name] as [string, string]),
+  );
 
   const { data: tasks, error: taskError } = await supabase
     .from("tasks")
@@ -265,8 +263,8 @@ export const listTasks = createServerFn({ method: "GET" })
 
     const people = await loadPeople(supabase);
     const { data: projects } = await supabase.from("projects").select("id, name");
-    const projectMap = new Map(
-      (projects ?? []).map((p: { id: string; name: string }) => [p.id, p.name]),
+    const projectMap = new Map<string, string>(
+      (projects ?? []).map((p: { id: string; name: string }) => [p.id, p.name] as [string, string]),
     );
 
     const tasks: Task[] = (rows ?? []).map((t: Record<string, unknown>) => ({
@@ -413,8 +411,8 @@ export const listActivity = createServerFn({ method: "GET" })
 
     const people = await loadPeople(supabase);
     const { data: projects } = await supabase.from("projects").select("id, name");
-    const projectMap = new Map(
-      (projects ?? []).map((p: { id: string; name: string }) => [p.id, p.name]),
+    const projectMap = new Map<string, string>(
+      (projects ?? []).map((p: { id: string; name: string }) => [p.id, p.name] as [string, string]),
     );
     const taskIds = [...new Set((rows ?? []).map((r: { task_id: string | null }) => r.task_id).filter(Boolean))];
     const taskMap = new Map<string, { task_number: number; title: string }>();
@@ -542,4 +540,3 @@ export const getDashboardStats = createServerFn({ method: "GET" })
     };
   });
 
-export type { SupabaseClientType };
