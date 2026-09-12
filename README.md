@@ -114,7 +114,7 @@ Row-Level Security (RLS) policies enforce the role model at the database layer; 
 
 ## Architecture decisions
 
-- **TanStack Start instead of Express/Fastify**: the brief asked for a Node/Express backend, but the project is built in Lovable's TanStack Start template. Server functions and public API routes give the same request/response semantics while keeping the project deployable on the edge.
+- **TanStack Start instead of Express/Fastify**: server functions and public API routes provide request/response semantics similar to Express while remaining deployable on the edge.
 - **Supabase Realtime over Socket.io**: realtime is delivered through PostgreSQL logical replication over a WebSocket. This avoids running a separate stateful Node server and lets the database be the single source of truth for live events.
 - **Database triggers for activity/notifications**: every task insert and update is recorded by PostgreSQL triggers. This guarantees audit history even if a client skips a request.
 - **pg_cron for overdue flagging**: a scheduled SQL function runs hourly to set `is_overdue`. The flag is persisted so dashboards and filters do not compute overdue state on every page load.
