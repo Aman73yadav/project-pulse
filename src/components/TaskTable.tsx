@@ -42,6 +42,8 @@ export function TaskTable({
   emptyMessage?: string;
 }) {
   const queryClient = useQueryClient();
+  const { data: me } = useMe();
+  const role = me?.role ?? "developer";
   const changeStatus = useMutation({
     mutationFn: (input: { id: string; status: TaskStatus }) => updateTaskStatus({ data: input }),
     onSuccess: (_data, input) => {
