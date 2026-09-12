@@ -1,24 +1,131 @@
-# Project Pulse
+# Studio Ops — Agency Project Dashboard
 
-Task: Build a Real-Time Client Project Dashboard with Role-Based Access & Live Activity Feed Overview Build a full stack web application that a small agency uses internally to manage client projects, track task progress, and monitor team activity in real time. This is not a tutorial CRUD app — it requires WebSocket implementation, role-based permission logic, and state management decisions that require genuine engineering judgment. What You Must Build 1. Authentication & Role System Three roles with strictly different access levels: Role Access Admin Full access — manage clients, projects, users, view all activity Project Manager Create & manage projects, assign tasks, view their team's activity only Developer View assigned tasks only, update task status, cannot see other developers' tasks ● JWT-based authentication (access token + refresh token) ● Refresh token must be stored in an HttpOnly cookie — not localStorage ● Role middleware must be enforced on every protected route at the API level — frontend-only role hiding is not acceptable ● A Developer must not be able to reach a Project Manager's data even by directly hitting the API endpoint with a modified token 2. Project & Task Management ● Admin and PM can create projects and assign them to clients Velozity Global Solutions Technical Hiring Assessment ● Projects contain tasks — each task has: title, description, assigned developer, status (To Do / In Progress / In Review / Done), priority (Low / Medium / High / Critical), due date, and an activity log ● Task status changes must be recorded with a timestamp and the user who made the change — this log must be stored in the database, not derived ● PM can only manage projects they created — they cannot see or edit another PM's projects ● Tasks past their due date must be automatically flagged as Overdue — this must happen via a scheduled background job, not on page load 3. Real-Time Activity Feed This is the core technical challenge of the task. ● Implement a live activity feed using WebSockets (Socket.io or native WebSocket — your choice, justify it in the README) ● When any user updates a task status, all users currently viewing that project must see the update in real time without refreshing ● The feed must show: who made the change, what they changed, and when — formatted as "Ravi moved Task #12 from In Progress → In Review · 2 mins ago" ● Admin sees activity across all projects in a single global feed ● PM sees activity only from their own projects ● Developer sees activity only on tasks assigned to them ● If a user is offline and comes back, they must see the last 20 activity events they missed — this must be fetched from the database, not cached in memory 4. Dashboard & Filters ● Admin dashboard: total projects, total tasks by status, overdue task count, active users online right now (shown as a live count using WebSocket presence) ● PM dashboard: their projects summary, tasks by priority, upcoming due dates this week ● Developer dashboard: their assigned tasks, sorted by priority then due date ● All task lists must support filtering by status, priority, and due date range — filters must work via query parameters so they are shareable as URLs 5. Notifications ● When a task is assigned to a developer, they receive an in-app notification (stored in DB, shown in UI) ● When a task they own is moved to In Review, the PM receives a notification ● Notifications must show as a count badge and expand into a dropdown — mark as read individually or all at once ● Unread notification count must update in real time via WebSocket, not polling Velozity Global Solutions Technical Hiring Assessment Technical Requirements ● Frontend: React with TypeScript — no plain JavaScript accepted ● Backend: Node.js with Express or Fastify — your choice, justify it ● Database: PostgreSQL — use proper relational schema with foreign keys, indexes on frequently queried columns, and explain your indexing decisions in the README ● ORM: Prisma or raw SQL — no MongoDB, no NoSQL ● Real-time: WebSocket — no long-polling, no SSE ● Background Jobs: Use node-cron or Bull queue for the overdue task scheduler — justify your choice ● Validation: All API inputs must be validated server-side — frontend validation alone is not sufficient ● Error Handling: All API endpoints must return consistent, structured error responses — no raw stack traces exposed to the client ● Environment: All secrets in .env — never hardcoded Seed Data Required Your repository must include a seed script that creates: ● 1 Admin, 2 Project Managers, 4 Developers ● At least 3 projects with 5+ tasks each in various statuses ● At least 2 tasks already in overdue state ● Pre-existing activity log entries so the feed is not empty on first load Submission Requirements ● Public GitHub/GitLab repository ● Host the application on Vercel and share the live application link ● README must include: local setup instructions (Docker preferred), database schema diagram or description, architectural decisions (WebSocket library choice, job queue choice, token storage approach), known limitations ● In the Explanation field (150–250 words): the hardest problem you solved, how you handled the real-time role-filtered feed, and one thing you'd do differently Evaluation Criteria Weight Role-based access — enforced at API level, not just frontend 25% Real-time feed — correct, role-filtered, with missed event catchup 25% Velozity Global Solutions Technical Hiring Assessment Database design — schema quality, relationships, indexing 20% Code architecture — separation of concerns, TypeScript usage 20% Seed data, README, setup experience 10% Auto-Disqualification: Role access enforced only on frontend, WebSocket replaced with polling, no seed script, no TypeScript, raw SQL mixed randomly into controllers, hardcoded secrets, missing refresh token implementation.
+An internal project-management dashboard for a small agency. It supports three roles (Admin, Project Manager, Developer), live team activity via WebSocket, DB-backed notifications, and shareable URL filters.
 
-This project was built with [Lovable](https://lovable.dev).
+## Features
 
-## Build with Lovable
+- **Role-based access**: Admin sees everything; Project Managers own and manage their projects; Developers see and update only their assigned tasks.
+- **Project & task management**: create clients, projects, and tasks; assign developers; set priority, due date, and status.
+- **Live activity feed**: status changes are broadcast in real time and persisted in the database. Offline users receive the last 20 missed events on reconnect.
+- **Notifications**: in-app notifications for task assignments and tasks moved to *In Review*, with unread badge and mark-read.
+- **Overdue flagging**: a scheduled database job flags overdue tasks every hour.
+- **Shareable filters**: task lists can be filtered by status, priority, and due-date range through query parameters.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/760c8d23-7a14-49c9-b7bc-7bc09e724fe5).
+## Tech stack
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+- **Framework**: React 19 + TanStack Start + TanStack Router
+- **Realtime**: Supabase Realtime (WebSocket)
+- **Database**: PostgreSQL (managed via Supabase)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4 + shadcn/ui components
+- **Validation**: Zod
 
-## Development
+## Prerequisites
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+- Node.js 20+ and a package manager (Bun recommended; npm works too)
+- A Supabase project
+- `pg_cron` and `pg_net` extensions enabled in Supabase
+
+## Environment variables
+
+Create a `.env` file at the project root with at least these keys:
+
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_PUBLISHABLE_KEY=your-anon-key
+SUPABASE_PROJECT_ID=your-project-id
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+VITE_SUPABASE_PROJECT_ID=your-project-id
+
+# Required for seeding and demo sign-in
+DEMO_ACCOUNT_PASSWORD=a-strong-demo-password
+SEED_SECRET=a-long-random-secret-for-reseeding
+```
+
+The Supabase service-role key is read inside server functions through the managed runtime and is not stored in the frontend bundle.
+
+## Setup
+
+1. Install dependencies:
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+bun install
 ```
+
+2. Apply the migrations in `supabase/migrations/` to your Supabase database in order.
+
+3. Schedule the overdue task sweeper once in Supabase SQL Editor:
+
+```sql
+SELECT cron.schedule('flag-overdue-tasks', '0 * * * *', 'SELECT public.flag_overdue_tasks();');
+```
+
+4. Start the dev server:
+
+```sh
+bun run dev
+```
+
+The app runs on `http://localhost:8080` by default.
+
+## Seeding demo data
+
+Visit `/api/public/seed` with a `POST` request. On a fresh, empty database the seed runs without a secret. To re-seed an existing database, send:
+
+```json
+{ "secret": "your-SEED_SECRET", "force": true }
+```
+
+## Demo accounts
+
+| Email | Role | Password |
+|-------|------|----------|
+| `admin@velozity.test` | Admin | configured by `DEMO_ACCOUNT_PASSWORD` |
+| `pm1@velozity.test` | Project Manager | configured by `DEMO_ACCOUNT_PASSWORD` |
+| `pm2@velozity.test` | Project Manager | configured by `DEMO_ACCOUNT_PASSWORD` |
+| `dev1@velozity.test` | Developer | configured by `DEMO_ACCOUNT_PASSWORD` |
+| `dev2@velozity.test` | Developer | configured by `DEMO_ACCOUNT_PASSWORD` |
+| `dev3@velozity.test` | Developer | configured by `DEMO_ACCOUNT_PASSWORD` |
+| `dev4@velozity.test` | Developer | configured by `DEMO_ACCOUNT_PASSWORD` |
+
+The sign-in page has buttons that pre-fill the demo credentials using the server-provided demo password.
+
+## Database schema
+
+Key tables:
+
+- `profiles` / `user_roles` — user identity and role assignment
+- `clients` — agency clients
+- `projects` — client projects, owned by the creating PM
+- `tasks` — project tasks with status, priority, assignee, due date, and overdue flag
+- `task_activity` — immutable history of status changes, assignments, and overdue flags
+- `notifications` — per-user in-app notifications
+
+Enums:
+
+- `app_role`: `admin`, `project_manager`, `developer`
+- `task_status`: `todo`, `in_progress`, `in_review`, `done`
+- `task_priority`: `low`, `medium`, `high`, `critical`
+
+Indexes cover the most queried paths: `projects.created_by`, `tasks.project_id`, `tasks.assignee_id`, `tasks.status`, `tasks.priority`, `tasks.due_date`, `task_activity.project_id + created_at`, and `notifications.recipient_id + read_at`.
+
+Row-Level Security (RLS) policies enforce the role model at the database layer; frontend hiding is not relied on for access control.
+
+## Architecture decisions
+
+- **TanStack Start instead of Express/Fastify**: server functions and public API routes provide request/response semantics similar to Express while remaining deployable on the edge.
+- **Supabase Realtime over Socket.io**: realtime is delivered through PostgreSQL logical replication over a WebSocket. This avoids running a separate stateful Node server and lets the database be the single source of truth for live events.
+- **Database triggers for activity/notifications**: every task insert and update is recorded by PostgreSQL triggers. This guarantees audit history even if a client skips a request.
+- **pg_cron for overdue flagging**: a scheduled SQL function runs hourly to set `is_overdue`. The flag is persisted so dashboards and filters do not compute overdue state on every page load.
+- **RLS helpers as SECURITY DEFINER functions**: recursive policy checks are avoided by delegating role checks to owner-rights helper functions.
+
+## Known limitations
+
+- The seed endpoint requires a service-role key and should be disabled or removed in production.
+- Realtime presence counts online users only when at least one authenticated client is subscribed to the shared presence channel.
+- File uploads and email notifications are not implemented.
+
+## Reflection: the hardest problem
+
+The real-time, role-filtered activity feed was the hardest part. Every status change must be visible to the right people, in the right scope, without leaking data. Admins need a global feed, Project Managers only their own projects, and Developers only tasks assigned to them. We solved this by making PostgreSQL both the event source and the authorization layer: the same RLS policies that protect reads also filter the historical query used for missed events, and Supabase Realtime pushes live changes to subscribed clients. The client then refetches its permitted activity window rather than trusting broadcast payloads for visibility. This keeps the feed consistent after reconnects or browser tabs coming back online, because the database—not an in-memory cache—is the source of truth. If I did it again, I would extract a dedicated event-sink table (`events`) with a stable ordering key and materialized per-role views, so the feed query stays O(1) for large histories instead of scanning `task_activity` with RLS predicates on every reconnect.
