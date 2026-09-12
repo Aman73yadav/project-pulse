@@ -73,11 +73,42 @@ export const getMe = createServerFn({ method: "GET" })
       .eq("id", context.userId)
       .maybeSingle();
     if (error) throwDbError(error, "Your profile could not be loaded.");
-    const role = await loadRole(supabase, context.userId);
+    let role = await loadRole(supabase, context.userId);
+    let profile = data as { full_name: string; email: string } | null;
+
+    // Self-heal accounts that exist in auth but have no profile row or role yet
+    // (for example the very first person to sign in on a fresh database).
+    if (!profile || !role) {
+      const claims = context.claims as { email?: string; user_metadata?: { full_name?: string } };
+      const email = claims?.email ?? "";
+      const fullName =
+        profile?.full_name || claims?.user_metadata?.full_name || email.split("@")[0] || "Team member";
+
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const db = supabaseAdmin as unknown as AnyClient;
+
+      if (!profile) {
+        await db
+          .from("profiles")
+          .upsert({ id: context.userId, full_name: fullName, email }, { onConflict: "id" });
+        profile = { full_name: fullName, email };
+      }
+      if (!role) {
+        const { count } = await db
+          .from("user_roles")
+          .select("id", { count: "exact", head: true })
+          .eq("role", "admin");
+        role = (count ?? 0) === 0 ? "admin" : "developer";
+        await db
+          .from("user_roles")
+          .upsert({ user_id: context.userId, role }, { onConflict: "user_id,role" });
+      }
+    }
+
     return {
       id: context.userId,
-      full_name: data?.full_name ?? "Team member",
-      email: data?.email ?? "",
+      full_name: profile?.full_name ?? "Team member",
+      email: profile?.email ?? "",
       role,
     } satisfies TeamMember;
   });

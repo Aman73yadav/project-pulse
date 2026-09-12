@@ -2,7 +2,12 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-type RealtimeTable = "tasks" | "task_activity" | "notifications";
+type RealtimeTable =
+  | "tasks"
+  | "task_activity"
+  | "notifications"
+  | "task_comments"
+  | "task_attachments";
 
 /**
  * Subscribes to Postgres change events over the Realtime WebSocket and

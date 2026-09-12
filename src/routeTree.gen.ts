@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedActivityRouteImport } from './routes/_authenticated/activity'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -19,6 +20,7 @@ import { Route as AuthenticatedProjectsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated/projects.$projectId'
+import { Route as AuthenticatedTaskTaskIdRouteImport } from './routes/_authenticated/task.$taskId'
 import { Route as ApiPublicSeedRouteImport } from './routes/api/public/seed'
 
 const IndexRoute = IndexRouteImport.update({
@@ -33,6 +35,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedActivityRoute = AuthenticatedActivityRouteImport.update({
@@ -71,6 +78,11 @@ const AuthenticatedProjectsProjectIdRoute =
     path: '/$projectId',
     getParentRoute: () => AuthenticatedProjectsRoute,
   } as any)
+const AuthenticatedTaskTaskIdRoute = AuthenticatedTaskTaskIdRouteImport.update({
+  id: '/task/$taskId',
+  path: '/task/$taskId',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiPublicSeedRoute = ApiPublicSeedRouteImport.update({
   id: '/api/public/seed',
   path: '/api/public/seed',
@@ -80,6 +92,7 @@ const ApiPublicSeedRoute = ApiPublicSeedRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/activity': typeof AuthenticatedActivityRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -87,11 +100,13 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof AuthenticatedTasksRoute
   '/team': typeof AuthenticatedTeamRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
+  '/task/$taskId': typeof AuthenticatedTaskTaskIdRoute
   '/api/public/seed': typeof ApiPublicSeedRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/activity': typeof AuthenticatedActivityRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -99,6 +114,7 @@ export interface FileRoutesByTo {
   '/tasks': typeof AuthenticatedTasksRoute
   '/team': typeof AuthenticatedTeamRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
+  '/task/$taskId': typeof AuthenticatedTaskTaskIdRoute
   '/api/public/seed': typeof ApiPublicSeedRoute
 }
 export interface FileRoutesById {
@@ -106,6 +122,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/activity': typeof AuthenticatedActivityRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -113,6 +130,7 @@ export interface FileRoutesById {
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
+  '/_authenticated/task/$taskId': typeof AuthenticatedTaskTaskIdRoute
   '/api/public/seed': typeof ApiPublicSeedRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +138,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/reset-password'
     | '/activity'
     | '/clients'
     | '/dashboard'
@@ -127,11 +146,13 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/team'
     | '/projects/$projectId'
+    | '/task/$taskId'
     | '/api/public/seed'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/reset-password'
     | '/activity'
     | '/clients'
     | '/dashboard'
@@ -139,12 +160,14 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/team'
     | '/projects/$projectId'
+    | '/task/$taskId'
     | '/api/public/seed'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/reset-password'
     | '/_authenticated/activity'
     | '/_authenticated/clients'
     | '/_authenticated/dashboard'
@@ -152,6 +175,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tasks'
     | '/_authenticated/team'
     | '/_authenticated/projects/$projectId'
+    | '/_authenticated/task/$taskId'
     | '/api/public/seed'
   fileRoutesById: FileRoutesById
 }
@@ -159,6 +183,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicSeedRoute: typeof ApiPublicSeedRoute
 }
 
@@ -183,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/activity': {
@@ -234,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdRouteImport
       parentRoute: typeof AuthenticatedProjectsRoute
     }
+    '/_authenticated/task/$taskId': {
+      id: '/_authenticated/task/$taskId'
+      path: '/task/$taskId'
+      fullPath: '/task/$taskId'
+      preLoaderRoute: typeof AuthenticatedTaskTaskIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/seed': {
       id: '/api/public/seed'
       path: '/api/public/seed'
@@ -264,6 +303,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProjectsRoute: typeof AuthenticatedProjectsRouteWithChildren
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
+  AuthenticatedTaskTaskIdRoute: typeof AuthenticatedTaskTaskIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -273,6 +313,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProjectsRoute: AuthenticatedProjectsRouteWithChildren,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
+  AuthenticatedTaskTaskIdRoute: AuthenticatedTaskTaskIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -282,6 +323,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicSeedRoute: ApiPublicSeedRoute,
 }
 export const routeTree = rootRouteImport

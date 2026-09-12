@@ -3,7 +3,9 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { updateTaskStatus } from "@/lib/dashboard.functions";
 import { readableError } from "@/lib/api-error";
-import { STATUS_LABEL, STATUS_ORDER, type Task, type TaskStatus } from "@/lib/domain";
+import { STATUS_LABEL, type Task, type TaskStatus } from "@/lib/domain";
+import { allowedStatuses } from "@/lib/workflow";
+import { useMe } from "@/hooks/useMe";
 import { OverdueBadge, PriorityBadge, StatusBadge } from "@/components/badges";
 import {
   Select,
