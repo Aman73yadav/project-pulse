@@ -12,10 +12,10 @@ import {
 } from "@/lib/domain";
 
 export interface TaskSearch {
-  status?: TaskStatus[];
-  priority?: TaskPriority[];
-  dueFrom?: string;
-  dueTo?: string;
+  status?: TaskStatus[] | undefined;
+  priority?: TaskPriority[] | undefined;
+  dueFrom?: string | undefined;
+  dueTo?: string | undefined;
 }
 
 /**
