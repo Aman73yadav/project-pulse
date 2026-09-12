@@ -44,10 +44,15 @@ function AuthPage() {
   }, [navigate]);
 
   useEffect(() => {
-    void getDemoPassword().then((result) => {
-      setDemoPassword(result.password);
-      setPassword((current) => current || result.password);
-    });
+    getDemoPassword()
+      .then((result) => {
+        setDemoPassword(result.password || DEFAULT_DEMO_PASSWORD);
+        setPassword((current) => current || result.password || DEFAULT_DEMO_PASSWORD);
+      })
+      .catch(() => {
+        setDemoPassword(DEFAULT_DEMO_PASSWORD);
+        setPassword((current) => current || DEFAULT_DEMO_PASSWORD);
+      });
   }, []);
 
   async function signIn(withEmail: string, withPassword: string) {
