@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, CalendarClock, FolderKanban, ListChecks } from "lucide-react";
+import { AlertTriangle, CalendarClock, FolderKanban, ListChecks, Radio } from "lucide-react";
 import { getDashboardStats, listTasks } from "@/lib/dashboard.functions";
 import {
   PRIORITY_LABEL,
@@ -14,6 +14,7 @@ import { AppShell } from "@/components/AppShell";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { TaskTable } from "@/components/TaskTable";
 import { useMe } from "@/hooks/useMe";
+import { usePresence } from "@/hooks/usePresence";
 import { useRealtimeRefresh } from "@/hooks/useRealtime";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
