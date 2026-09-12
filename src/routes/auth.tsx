@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck } from "lucide-react";
-import { getDemoPassword } from "@/lib/seed.functions";
+import { getDemoPassword, DEFAULT_DEMO_PASSWORD } from "@/lib/seed.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -44,10 +44,15 @@ function AuthPage() {
   }, [navigate]);
 
   useEffect(() => {
-    void getDemoPassword().then((result) => {
-      setDemoPassword(result.password);
-      setPassword((current) => current || result.password);
-    });
+    getDemoPassword()
+      .then((result) => {
+        setDemoPassword(result.password || DEFAULT_DEMO_PASSWORD);
+        setPassword((current) => current || result.password || DEFAULT_DEMO_PASSWORD);
+      })
+      .catch(() => {
+        setDemoPassword(DEFAULT_DEMO_PASSWORD);
+        setPassword((current) => current || DEFAULT_DEMO_PASSWORD);
+      });
   }, []);
 
   async function signIn(withEmail: string, withPassword: string) {

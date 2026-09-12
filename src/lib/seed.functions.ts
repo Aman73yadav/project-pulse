@@ -12,11 +12,15 @@ import { apiError } from "./api-error";
  * Idempotent: it refuses to run twice unless `force` is set.
  */
 
-/** Demo password lives in the environment, never in source. */
+/**
+ * Demo password. Prefer the environment value; fall back to the shared demo
+ * password so the public demo works on hosts without env configuration.
+ * This is throwaway seed-data credential material, not a real secret.
+ */
+export const DEFAULT_DEMO_PASSWORD = "Velozity#Demo2026";
+
 function demoPassword(): string {
-  const value = process.env["DEMO_ACCOUNT_PASSWORD"];
-  if (!value) throw apiError("INTERNAL_ERROR", "Demo password is not configured.");
-  return value;
+  return process.env["DEMO_ACCOUNT_PASSWORD"] || DEFAULT_DEMO_PASSWORD;
 }
 
 /** Public: lets the sign-in page fill the demo credentials for this internal tool. */
