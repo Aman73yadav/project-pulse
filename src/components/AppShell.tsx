@@ -25,8 +25,8 @@ export function AppShell({
   children,
 }: {
   title: string;
-  subtitle?: string;
-  actions?: ReactNode;
+  subtitle?: string | undefined;
+  actions?: ReactNode | undefined;
   children: ReactNode;
 }) {
   const { data: me } = useMe();

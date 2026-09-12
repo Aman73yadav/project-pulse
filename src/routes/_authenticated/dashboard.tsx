@@ -113,7 +113,7 @@ function DashboardPage() {
             <StatCard label="Tasks" value={stats.data.taskCount} icon={ListChecks} />
             <StatCard
               label="Overdue"
-              value={stats.data.overdueCount}
+              value={stats.data.overdue}
               icon={AlertTriangle}
               tone="danger"
             />

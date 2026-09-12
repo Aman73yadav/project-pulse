@@ -18,6 +18,6 @@ export function useMe() {
   return useQuery(meQueryOptions);
 }
 
-export function useTeam() {
-  return useQuery(teamQueryOptions);
+export function useTeam(enabled = true) {
+  return useQuery({ ...teamQueryOptions, enabled });
 }
