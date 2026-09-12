@@ -86,8 +86,9 @@ function DashboardPage() {
 
   useRealtimeRefresh(["tasks", "task_activity"], ["stats", "tasks"], "dashboard-stats");
 
-  const title =
-    role === "admin"
+  const title = !me
+    ? "Dashboard"
+    : role === "admin"
       ? "Studio overview"
       : role === "project_manager"
         ? "My projects"
@@ -97,11 +98,13 @@ function DashboardPage() {
     <AppShell
       title={title}
       subtitle={
-        role === "admin"
-          ? "Everything across the studio, live."
-          : role === "project_manager"
-            ? "Only the projects you own — enforced by the database."
-            : "Only the tasks assigned to you — enforced by the database."
+        !me
+          ? "Loading your view…"
+          : role === "admin"
+            ? "Everything across the studio, live."
+            : role === "project_manager"
+              ? "Only the projects you own — enforced by the database."
+              : "Only the tasks assigned to you — enforced by the database."
       }
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

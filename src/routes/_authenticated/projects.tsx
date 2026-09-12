@@ -146,7 +146,13 @@ function ProjectsPage() {
   return (
     <AppShell
       title="Projects"
-      subtitle="Project managers see only the projects they created."
+      subtitle={
+        me?.role === "admin"
+          ? "Every client project in the studio."
+          : me?.role === "project_manager"
+            ? "Only the projects you created."
+            : "Only the projects you have tasks on."
+      }
       actions={canCreate ? <NewProjectDialog /> : undefined}
     >
       {projects.isLoading ? (
